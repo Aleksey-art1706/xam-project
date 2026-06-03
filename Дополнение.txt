@@ -1,0 +1,51 @@
+PHP
+открыть вс код команда control+shift+p после ввести settings.json выбрать где Open User Settings
+после откроится данный файл и в скобки впишешь вот это "php.validate.executablePath": "C:\\xampp\\php\\php.exe"
+еслихочешь проверитьсработало введи код <?php phpinfo()?> тамдолжна быть таблица
+
+База данных общая
+
+CREATE DATABASE IF NOT EXISTS exam_db;
+USE exam_db;
+
+-- 2. Таблица пользователей (расширенная)
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    login VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    birth_date DATE,
+    is_admin INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 3. Таблица заявок (универсальная)
+CREATE TABLE IF NOT EXISTS applications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    service_type VARCHAR(100) NOT NULL,  -- 'банкетный зал' или 'катер/яхта/лайнер'
+    event_date DATE NOT NULL,
+    payment_method VARCHAR(50) NOT NULL,
+    status VARCHAR(50) DEFAULT 'Новая',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 4. Таблица отзывов
+CREATE TABLE IF NOT EXISTS reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    application_id INT NOT NULL,
+    review TEXT NOT NULL,
+    rating INT DEFAULT 5,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
+);
+
+-- 5. Добавляем админа (логин: Admin26, пароль: Demo20)
+INSERT INTO users (login, email, password, full_name, phone, is_admin) 
+SELECT 'Admin26', 'admin@local.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Администратор', '+70000000000', 1
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE login = 'Admin26')
